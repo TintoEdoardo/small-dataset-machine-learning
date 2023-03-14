@@ -3,15 +3,15 @@ DATASET MANAGEMENT AND VALIDATION FUNCTIONS
 """
 
 import Constants
-import csv
+import pandas
 
 
-def Load_Dataset():
+def Load_Dataset ():
     """
     :return: samples, features: list (dict), list (list (str))
     """
 
-    samples = []
+    samples  = pandas.DataFrame ()
     features = []
 
     #  The input dataset is divided in sections,
@@ -22,38 +22,37 @@ def Load_Dataset():
         #  The current section content is read
         #  into 'file'
         path_to_section = Constants.path_to_datasets + section
-        section_file = open(path_to_section, newline='')
+        section_file    = open (path_to_section, newline='')
 
-        #  The header of the dataset (feature names)
-        #  is acquired
-        rows = csv.reader(section_file)
-        header = next(rows)
-
-        #  Debug mode
-        if Constants.in_debug_mode:
-            print(header)
-
-        #  Finally turn the section into a list
-        #  of dictionary
-        section_content = csv.DictReader(section_file)
-        samples_list = list(section_content)
+        #  The 'section_file' is read into a pandas
+        #  DataFrame, and the header of the dataset
+        #  (feature names) is acquired
+        section_content = pandas.read_csv (section_file)
+        header          = section_content.columns.to_list ()
 
         #  Debug mode
         if Constants.in_debug_mode:
-            print("Data from file " + section + ": ")
-            for i in samples_list:
-                print(i)
+            print (header)
 
-        samples.append(samples_list)
-        features.append(header)
+        #  Debug mode
+        if Constants.in_debug_mode:
+            print ("Data from file " + section + ": ")
+            print (section_content)
 
-    return samples, features
+        samples = pandas.concat ([samples, section_content])
+        features.append (header)
+
+    #  Extract labels
+    lables  = samples ['Patient']
+    samples = samples.drop ('Patient', axis=1)
+
+    return samples, features, lables
 
 
-def Check_Features_Consistency(features):
+def Check_Features_Consistency (features):
     """
-    :param features: list (list (str))
-    :return: int
+    :param: features: list (list (str))
+    :return: features: list (str)
     """
     base_features     = features [0]
     features_len      = len (base_features)
@@ -83,4 +82,4 @@ def Check_Features_Consistency(features):
             print (e)
 
     #  Otherwise the execution ends returning 0
-    return 0
+    return base_features [1:]
