@@ -97,21 +97,28 @@ def Build_Correlation_Matrix (samples, features, name, title):
         (Constants.path_to_graphs + "corr_mat_" + name + ".png", bbox_inches='tight')
 
 
-def Compare_Model (samples, features, model, test_size, cv, name, title):
+def Split_Samples (samples, features, test_size):
     """
-    :param test_size: float
-    :param cv: int
-    :param name: str
-    :param title: str
     :param samples: pandas DataFrame
     :param features: list (str)
-    :param model: str
-    :return: @show image
+    :param test_size: float
+    :return: list (list (float))
     """
     X = Select_Features (samples, features)
-    Y = Select_Features (samples, Target_Features ()).values.ravel ()
+    Y = Select_Features (samples, Target_Features()).values.ravel()
 
-    X_train, X_test, Y_train, Y_test = train_test_split (X, Y, test_size=test_size, random_state=0)
+    return train_test_split (X, Y, test_size=test_size, random_state=0)
+
+
+def Compare_Model (X_train, X_test, Y_train, model, cv):
+    """
+    :param X_train: list (list (float))
+    :param X_test: list (list (float))
+    :param Y_train: list (list (float))
+    :param cv: int
+    :param model: str
+    :return: list (float)
+    """
 
     #  Parameters varying on the model under test
     prams = -1
@@ -140,16 +147,22 @@ def Compare_Model (samples, features, model, test_size, cv, name, title):
     clf   = GridSearchCV (estim, prams, cv=cv)
     clf.fit (X_train, Y_train)
 
+    return clf.predict (X_test)
+
+
+def Build_Comparison_Graphs (Y_list, Y_labels, title, name):
     #  Plot the results
     plt.clf()
     plt.gcf().set_size_inches (12, 10)
-    plt.plot (clf.predict (X_test), label="Predicted MUs")
-    plt.plot (Y_test, label="Measured MUs")
+
+    #  Add every array to the graph
+    for i in range (len (Y_list)):
+        if i == 0:
+            plt.plot (Y_list [i], 'o-', label=Y_labels [i])
+        else:
+            plt.plot (Y_list [i], label=Y_labels [i])
+
     plt.legend ()
     plt.title (title)
-    exp_tag = "_" + model + "_ts" + str (test_size) + "_cv" + str (cv)
     plt.savefig\
-        (Constants.path_to_graphs + "comp_" + name + exp_tag + ".png", bbox_inches='tight')
-
-
-
+        (Constants.path_to_graphs + name + ".png", bbox_inches='tight')

@@ -84,15 +84,23 @@ if __name__ == '__main__':
         n = ftp['name']
         t = ftp['title']
 
-        #  Test two different partitioning approaches
-        for test_size in [0.5, 0.6]:
+        test_size = 0.5
+        X_train, X_test, Y_train, Y_test = DataAnalysis.Split_Samples (samples, f, test_size)
 
-            #  Iterates for each number of folding
-            #  during validation
+        Y_list   = [Y_test]
+        Y_labels = ["Measured MUs"]
+
+        #  Iterates for each number of folding
+        #  during validation
+        for model in ['SVR', 'Tree', 'CNN']:
+
+            #  Iterates for each model used
             for cv in [2, 4]:
+                Y_current  = DataAnalysis.Compare_Model (X_train, X_test, Y_train, model, cv)
+                Y_label    = "Predicted UM (" + model + ", " + "CV = " + str (cv) + ")"
+                Y_list.append (Y_current)
+                Y_labels.append (Y_label)
 
-                #  Iterates for each model used
-                for model in ['SVR', 'Tree', 'CNN']:
-                    DataAnalysis.Compare_Model\
-                        (DataAnalysis.Select_Features (samples, f),
-                         f, model, test_size, cv, n, t)
+        file_name = "comp_" + n + ".png"
+        DataAnalysis.Build_Comparison_Graphs (Y_list, Y_labels, t, file_name)
+
