@@ -4,6 +4,7 @@ CONSTANTS AND CONFIGURATION
 
 """ Constants"""
 path_to_datasets       = "Datasets/"
+path_to_graphs         = "Graphs/"
 dataset_section_prefix = "section_"
 last_section           = 3
 dataset_sections       = range (1, last_section + 1)
@@ -65,6 +66,8 @@ tr_features = [
     'MVC/lean mass total',
     'MVC/lean mass right leg'
 ]
+
+we_features = ['Week']
 
 ta_features = ['UM a prova']
 
